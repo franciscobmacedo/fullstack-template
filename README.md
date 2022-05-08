@@ -34,8 +34,8 @@ build and run for development
 docker-compose up -d --build
 ```
 
-the api server will be available in http://localhost:8000
-the frontend application will be available in http://localhost:8080
+- the api server will be available in http://localhost:8000
+- the frontend application will be available in http://localhost:8080
 
 ## Setup for deployment
 
