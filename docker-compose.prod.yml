@@ -1,0 +1,76 @@
+networks:
+  web:
+    external: true
+  internal:
+    external: false
+
+services:
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    labels:
+      - traefik.http.routers.vue.rule=Host(`mywebsite.com`)
+      - traefik.http.routers.vue.tls=true
+      - traefik.http.routers.vue.tls.certresolver=lets-encrypt
+      - traefik.port=80
+    networks:
+      - internal
+      - web
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - VUE_APP_API=https://api.mywebsite.com
+  backend:
+    container_name: backend
+    build: 
+      context: ./backend/
+      dockerfile: Dockerfile.prod
+    command: gunicorn backend.wsgi:application --bind 0.0.0.0:8000
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - ./backend/logs:/usr/src/backend/django/logs
+    labels:
+      - traefik.http.routers.backend.rule=Host(`api.mywebsite.com`)
+      - traefik.http.routers.backend.tls=true
+      - traefik.http.routers.backend.tls.certresolver=lets-encrypt
+      - traefik.port=8000
+    networks:
+      - internal
+      - web
+    expose:
+      - 8000
+  db:
+    container_name: db
+    image: postgres:12.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    networks:
+      - internal
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    env_file:
+      - .env
+    expose:
+      - "5050"
+    labels:
+      - traefik.http.routers.pgadmin.rule=Host(`db-admin.mywebsite.com`)
+      - traefik.http.routers.pgadmin.tls=true
+      - traefik.http.routers.pgadmin.tls.certresolver=lets-encrypt
+      - traefik.port=5050
+    networks:
+      - internal
+      - web
+
+volumes:
+  postgres_data:

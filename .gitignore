@@ -1,0 +1,17 @@
+__pycache__/
+
+.vscode/
+.mypy_cache
+*.pyc
+.env
+.venv
+env/
+venv/
+env.bak/
+venv.bak/
+
+mypy.ini
+data/
+logs/
+
+*.db

@@ -1,0 +1,53 @@
+services:
+  frontend:
+      container_name: frontend
+      build:
+        context: ./frontend/
+        dockerfile: Dockerfile
+      volumes:      
+        - ./frontend:/app
+        - /app/node_modules
+      stdin_open: true
+      tty: true
+      ports:
+        - 8080:8080
+      environment:
+        - CHOKIDAR_USEPOLLING=true
+      env_file:
+        - .env.dev
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+
+    volumes:      
+      - ./backend:/code
+    ports:
+      - 8000:8000
+    env_file:
+      - .env.dev
+    depends_on:
+      - db
+  db:
+    container_name: db
+    image: postgres:12.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env.dev
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    env_file:
+      - .env.dev
+    expose:
+      - 80
+    depends_on:
+      - db
+    ports:
+      - 5050:80
+volumes:
+  postgres_data:

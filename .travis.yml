@@ -1,0 +1,11 @@
+
+language: python
+python:
+  - "3.9"
+# command to install dependencies
+install:
+  - pip install -r backend/requirements/dev.txt
+# command to run tests
+before_script: cd backend
+script:
+  - python3 manage.py test
